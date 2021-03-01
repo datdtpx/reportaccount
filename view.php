@@ -2,7 +2,7 @@
 require_once "../../config.php";
 require_once "$CFG->libdir/formslib.php";
 require_once "lib.php";
-global $DB;
+global $DB, $CFG;
 
 require_login();
 
@@ -21,120 +21,83 @@ $fromform = $mform->get_data();
 $mform->display();
 
 if ($mform->get_data() != null) {
-
-	//ngay ket thuc
-	$to = $fromform->enddate;
-
-	//sau ngay ket thuc 1 ngay
-	$day = (new DateTime())->setTimestamp(usergetmidnight($fromform->enddate));
-	$day->modify('-1 day');
-	$lastDay = $day->getTimestamp();
-
-	//sau ngay ket thuc 1 ngay 1 tuan
-	$day->modify('-1 week');
-	$lastWeek1 = $day->getTimestamp();
-
-	//sau ngay ket thuc 2 ngay 1 tuan
-	$day->modify('-1 day');
-	$lastWeek2 = $day->getTimestamp();
-
-	//sau ngay ket thuc 3 ngay 1 tuan 1 thang
-	$day->modify('-1 day');
-	$day->modify('-1 month');
-	$lastMonth1 = $day->getTimestamp();
-
-	//sau ngay ket thuc 4 ngay 1 tuan 1 thang
-	$day->modify('-1 day');
-	$lastMonth2 = $day->getTimestamp();
-
 	//ngay bat dau
 	$from = $fromform->startdate;
+	//ngay ket thuc
+	$to = $fromform->enddate;
+	if ($fromform->filter == 'day') {
+		$day = (new DateTime())->setTimestamp(usergetmidnight($to));
+		$day->modify('-1 day');
+		$last = $day->getTimestamp();
 
-	//lay du lieu Ngay
-	$accDay = $DB->get_records_sql('SELECT username,firstname,lastname FROM {user} WHERE timecreated>=?', [$to]);
-	$countAccDay = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=?', [$to]);
+		//lay du lieu Ngay
+		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=?', [$to]);
+		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=?', [$to]);
 
-	//lay du lieu Tuan
-	$accWeek = $DB->get_records_sql('SELECT username,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastWeek1, $lastDay]);
-	$countAccWeek = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastWeek1, $lastDay]);
+	} elseif ($fromform->filter == 'week') {
+		//sau ngay ket thuc 1 tuan
+		$day = (new DateTime())->setTimestamp(usergetmidnight($to));
+		$day->modify('-1 week');
+		$lastWeek = $day->getTimestamp();
 
-	//lay du lieu Thang
-	$accMonth = $DB->get_records_sql('SELECT username,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastMonth1, $lastWeek2]);
-	$countAccMonth = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastMonth1, $lastWeek2]);
+		//sau ngay ket thuc 1 ngay 1 tuan
+		$day->modify('-1 day');
+		$last = $day->getTimestamp();
+
+		//lay du lieu Tuan
+		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastWeek, $to]);
+		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastWeek, $to]);
+
+	} elseif ($fromform->filter == 'month') {
+		//sau ngay ket thuc 1 thang
+		$day = (new DateTime())->setTimestamp(usergetmidnight($to));
+		$day->modify('-1 month');
+		$lastMonth = $day->getTimestamp();
+
+		//sau ngay ket thuc 1 ngay 1 thang
+		$day->modify('-1 day');
+		$last = $day->getTimestamp();
+
+		//lay du lieu Thang
+		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastMonth, $to]);
+		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastMonth, $to]);
+	}
 
 	//lay du lieu Con lai
-	$accDayLeft = $DB->get_records_sql('SELECT username,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$from, $lastMonth2]);
-	$countAccDayLeft = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$from, $lastMonth2]);
+	$accDayLeft = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$from, $last]);
+	$countAccDayLeft = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$from, $last]);
+
+	print_object($accDayLeft);
 
 	$table = new html_table();
 	$stt = 1;
 	$table->head = array(get_string('id', 'block_reportaccount'), get_string('fullname'), get_string('time'));
 
-	//do du lieu Ngay ra bang
-	foreach ($accDay as $key => $value) {
+	//do du lieu ra bang
+	foreach ($acc as $key => $value) {
 		$row = new html_table_row();
 		$cell = new html_table_cell($stt++);
 		$row->cells[] = $cell;
-		$cell = new html_table_cell($value->lastname . ' ' . $value->firstname);
+		$cell = new html_table_cell(html_writer::link($CFG->wwwroot . '/user/profile.php?id=' . $value->id, $value->lastname . ' ' . $value->firstname));
 		$row->cells[] = $cell;
-		$cell = new html_table_cell(date("d/m/Y", $to));
-		$cell->rowspan = $countAccDay;
+		if ($fromform->filter == 'day') {
+			$cell = new html_table_cell(date("d/m/Y", $to));
+		} elseif ($fromform->filter == 'week') {
+			$cell = new html_table_cell(date("d/m/Y", $lastWeek) . ' - ' . date("d/m/Y", $to));
+		} elseif ($fromform->filter == 'month') {
+			$cell = new html_table_cell(date("d/m/Y", $lastMonth) . ' - ' . date("d/m/Y", $to));
+		}
+		$cell->rowspan = $countAcc;
 		$row->cells[] = $cell;
 		$table->data[] = $row;
 		break;
 	}
-	array_shift($accDay);
-	foreach ($accDay as $key => $value) {
+	array_shift($acc);
+	foreach ($acc as $key => $value) {
 		$row = new html_table_row();
 		$cell = new html_table_cell($stt++);
 		$row->cells[] = $cell;
-		$cell = new html_table_cell($value->lastname . ' ' . $value->firstname);
-		$row->cells[] = $cell;
-		$table->data[] = $row;
-	}
-
-	//do du lieu Tuan ra bang
-	foreach ($accWeek as $key => $value) {
-		$row = new html_table_row();
-		$cell = new html_table_cell($stt++);
-		$row->cells[] = $cell;
-		$cell = new html_table_cell($value->lastname . ' ' . $value->firstname);
-		$row->cells[] = $cell;
-		$cell = new html_table_cell(date("d/m/Y", $lastWeek1) . ' - ' . date("d/m/Y", $lastDay));
-		$cell->rowspan = $countAccWeek;
-		$row->cells[] = $cell;
-		$table->data[] = $row;
-		break;
-	}
-	array_shift($accWeek);
-	foreach ($accWeek as $key => $value) {
-		$row = new html_table_row();
-		$cell = new html_table_cell($stt++);
-		$row->cells[] = $cell;
-		$cell = new html_table_cell($value->lastname . ' ' . $value->firstname);
-		$row->cells[] = $cell;
-		$table->data[] = $row;
-	}
-
-	//do du lieu Thang ra bang
-	foreach ($accMonth as $key => $value) {
-		$row = new html_table_row();
-		$cell = new html_table_cell($stt++);
-		$row->cells[] = $cell;
-		$cell = new html_table_cell($value->lastname . ' ' . $value->firstname);
-		$row->cells[] = $cell;
-		$cell = new html_table_cell(date("d/m/Y", $lastMonth1) . ' - ' . date("d/m/Y", $lastWeek2));
-		$cell->rowspan = $countAccMonth;
-		$row->cells[] = $cell;
-		$table->data[] = $row;
-		break;
-	}
-	array_shift($accMonth);
-	foreach ($accMonth as $key => $value) {
-		$row = new html_table_row();
-		$cell = new html_table_cell($stt++);
-		$row->cells[] = $cell;
-		$cell = new html_table_cell($value->lastname . ' ' . $value->firstname);
+		$cell = new html_table_cell(html_writer::link($CFG->wwwroot . '/user/profile.php?id=' . $value->id, $value->lastname . ' ' . $value->firstname));
 		$row->cells[] = $cell;
 		$table->data[] = $row;
 	}
@@ -144,9 +107,9 @@ if ($mform->get_data() != null) {
 		$row = new html_table_row();
 		$cell = new html_table_cell($stt++);
 		$row->cells[] = $cell;
-		$cell = new html_table_cell($value->lastname . ' ' . $value->firstname);
+		$cell = new html_table_cell(html_writer::link($CFG->wwwroot . '/user/profile.php?id=' . $value->id, $value->lastname . ' ' . $value->firstname));
 		$row->cells[] = $cell;
-		$cell = new html_table_cell(date("d/m/Y", $from) . ' - ' . date("d/m/Y", $lastMonth2));
+		$cell = new html_table_cell(date("d/m/Y", $from) . ' - ' . date("d/m/Y", $last));
 		$cell->rowspan = $countAccDayLeft;
 		$row->cells[] = $cell;
 		$table->data[] = $row;
@@ -157,7 +120,7 @@ if ($mform->get_data() != null) {
 		$row = new html_table_row();
 		$cell = new html_table_cell($stt++);
 		$row->cells[] = $cell;
-		$cell = new html_table_cell($value->lastname . ' ' . $value->firstname);
+		$cell = new html_table_cell(html_writer::link($CFG->wwwroot . '/user/profile.php?id=' . $value->id, $value->lastname . ' ' . $value->firstname));
 		$row->cells[] = $cell;
 		$table->data[] = $row;
 	}

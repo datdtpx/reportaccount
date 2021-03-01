@@ -11,12 +11,12 @@ class reportaccount_form extends moodleform {
 
 		$mform->addElement('date_selector', 'enddate', get_string('to'));
 
-		// $radioarray = array();
-		// $radioarray[] = $mform->createElement('radio', 'filter', '', get_string('day', 'block_reportaccount'), 'day');
-		// $radioarray[] = $mform->createElement('radio', 'filter', '', get_string('week'), 'week');
-		// $radioarray[] = $mform->createElement('radio', 'filter', '', get_string('month'), 'month');
-		// $mform->addGroup($radioarray, 'radioar', '', array(' '), false);
-		// $mform->setDefault('filter', 'day');
+		$radioarray = array();
+		$radioarray[] = $mform->createElement('radio', 'filter', '', get_string('day', 'block_reportaccount'), 'day');
+		$radioarray[] = $mform->createElement('radio', 'filter', '', get_string('week'), 'week');
+		$radioarray[] = $mform->createElement('radio', 'filter', '', get_string('month'), 'month');
+		$mform->addGroup($radioarray, 'radioar', '', array(' '), false);
+		$mform->setDefault('filter', 'day');
 
 		$mform->addElement('submit', 'send', get_string('find', 'block_reportaccount'));
 	}
