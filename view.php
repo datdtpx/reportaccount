@@ -67,8 +67,6 @@ if ($mform->get_data() != null) {
 	$accDayLeft = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$from, $last]);
 	$countAccDayLeft = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$from, $last]);
 
-	print_object($accDayLeft);
-
 	$table = new html_table();
 	$stt = 1;
 	$table->head = array(get_string('id', 'block_reportaccount'), get_string('fullname'), get_string('time'));
