@@ -27,45 +27,37 @@ if ($mform->get_data() != null) {
 	$to = $fromform->enddate;
 	if ($fromform->filter == 'day') {
 		$day = (new DateTime())->setTimestamp(usergetmidnight($to));
-		//$day->modify('-1 day');
 		$last = $day->getTimestamp();
 
 		//lay du lieu Ngay
-		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$to, $to + 86400]);
-		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$to, $to + 86400]);
+		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<?', [$to, $to + 86400]);
+		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<?', [$to, $to + 86400]);
 
 	} elseif ($fromform->filter == 'week') {
 		//sau ngay ket thuc 1 tuan
 		$day = (new DateTime())->setTimestamp(usergetmidnight($to));
 		$day->modify('-1 week');
-		$lastWeek = $day->getTimestamp();
-
-		//sau ngay ket thuc 1 ngay 1 tuan
-		//$day->modify('-1 day');
 		$last = $day->getTimestamp();
 
 		//lay du lieu Tuan
-		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastWeek, $to + 86400]);
-		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastWeek, $to + 86400]);
+		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$last, $to + 86400]);
+		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$last, $to + 86400]);
 
 	} elseif ($fromform->filter == 'month') {
 		//sau ngay ket thuc 1 thang
 		$day = (new DateTime())->setTimestamp(usergetmidnight($to));
 		$day->modify('-1 month');
-		$lastMonth = $day->getTimestamp();
-
-		//sau ngay ket thuc 1 ngay 1 thang
-		//$day->modify('-1 day');
 		$last = $day->getTimestamp();
 
 		//lay du lieu Thang
-		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastMonth, $to + 86400]);
-		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastMonth, $to + 86400]);
+		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$last, $to + 86400]);
+		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$last, $to + 86400]);
 	}
+
 	//lay du lieu Con lai
-	$accDayLeft = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$from, $last]);
-	$countAccDayLeft = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$from, $last]);
-	//print_object($accDayLeft);
+	$accDayLeft = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<?', [$from, $last]);
+	$countAccDayLeft = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<?', [$from, $last]);
+	echo '</br>' . date('d/m/Y H:i:s', $from) . ' - ' . date('d/m/Y H:i:s', $last) . '</br>';
 
 	$table = new html_table();
 	$stt = 1;
@@ -81,9 +73,9 @@ if ($mform->get_data() != null) {
 		if ($fromform->filter == 'day') {
 			$cell = new html_table_cell(date("d/m/Y", $to));
 		} elseif ($fromform->filter == 'week') {
-			$cell = new html_table_cell(date("d/m/Y", $lastWeek) . ' - ' . date("d/m/Y", $to));
+			$cell = new html_table_cell(date("d/m/Y", $last) . ' - ' . date("d/m/Y", $to));
 		} elseif ($fromform->filter == 'month') {
-			$cell = new html_table_cell(date("d/m/Y", $lastMonth) . ' - ' . date("d/m/Y", $to));
+			$cell = new html_table_cell(date("d/m/Y", $last) . ' - ' . date("d/m/Y", $to));
 		}
 		$cell->rowspan = $countAcc;
 		$row->cells[] = $cell;
@@ -107,7 +99,7 @@ if ($mform->get_data() != null) {
 		$row->cells[] = $cell;
 		$cell = new html_table_cell(html_writer::link($CFG->wwwroot . '/user/profile.php?id=' . $value->id, $value->lastname . ' ' . $value->firstname));
 		$row->cells[] = $cell;
-		$cell = new html_table_cell(date("d/m/Y", $from) . ' - ' . date("d/m/Y", $last));
+		$cell = new html_table_cell(date("d/m/Y", $from) . ' - ' . date("d/m/Y", $last - 86400));
 		$cell->rowspan = $countAccDayLeft;
 		$row->cells[] = $cell;
 		$table->data[] = $row;
