@@ -27,12 +27,12 @@ if ($mform->get_data() != null) {
 	$to = $fromform->enddate;
 	if ($fromform->filter == 'day') {
 		$day = (new DateTime())->setTimestamp(usergetmidnight($to));
-		$day->modify('-1 day');
+		//$day->modify('-1 day');
 		$last = $day->getTimestamp();
 
 		//lay du lieu Ngay
-		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=?', [$to]);
-		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=?', [$to]);
+		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$to, $to + 86400]);
+		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$to, $to + 86400]);
 
 	} elseif ($fromform->filter == 'week') {
 		//sau ngay ket thuc 1 tuan
@@ -41,12 +41,12 @@ if ($mform->get_data() != null) {
 		$lastWeek = $day->getTimestamp();
 
 		//sau ngay ket thuc 1 ngay 1 tuan
-		$day->modify('-1 day');
+		//$day->modify('-1 day');
 		$last = $day->getTimestamp();
 
 		//lay du lieu Tuan
-		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastWeek, $to]);
-		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastWeek, $to]);
+		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastWeek, $to + 86400]);
+		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastWeek, $to + 86400]);
 
 	} elseif ($fromform->filter == 'month') {
 		//sau ngay ket thuc 1 thang
@@ -55,17 +55,17 @@ if ($mform->get_data() != null) {
 		$lastMonth = $day->getTimestamp();
 
 		//sau ngay ket thuc 1 ngay 1 thang
-		$day->modify('-1 day');
+		//$day->modify('-1 day');
 		$last = $day->getTimestamp();
 
 		//lay du lieu Thang
-		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastMonth, $to]);
-		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastMonth, $to]);
+		$acc = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastMonth, $to + 86400]);
+		$countAcc = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$lastMonth, $to + 86400]);
 	}
-
 	//lay du lieu Con lai
 	$accDayLeft = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<=?', [$from, $last]);
 	$countAccDayLeft = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<=?', [$from, $last]);
+	//print_object($accDayLeft);
 
 	$table = new html_table();
 	$stt = 1;
