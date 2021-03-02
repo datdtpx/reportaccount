@@ -57,7 +57,6 @@ if ($mform->get_data() != null) {
 	//lay du lieu Con lai
 	$accDayLeft = $DB->get_records_sql('SELECT id,firstname,lastname FROM {user} WHERE timecreated>=? AND timecreated<?', [$from, $last]);
 	$countAccDayLeft = $DB->count_records_sql('SELECT COUNT(id) FROM {user} WHERE timecreated>=? AND timecreated<?', [$from, $last]);
-	echo '</br>' . date('d/m/Y H:i:s', $from) . ' - ' . date('d/m/Y H:i:s', $last) . '</br>';
 
 	$table = new html_table();
 	$stt = 1;
