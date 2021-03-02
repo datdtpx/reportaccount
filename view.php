@@ -71,9 +71,7 @@ if ($mform->get_data() != null) {
 		$row->cells[] = $cell;
 		if ($fromform->filter == 'day') {
 			$cell = new html_table_cell(date("d/m/Y", $to));
-		} elseif ($fromform->filter == 'week') {
-			$cell = new html_table_cell(date("d/m/Y", $last) . ' - ' . date("d/m/Y", $to));
-		} elseif ($fromform->filter == 'month') {
+		} else {
 			$cell = new html_table_cell(date("d/m/Y", $last) . ' - ' . date("d/m/Y", $to));
 		}
 		$cell->rowspan = $countAcc;
