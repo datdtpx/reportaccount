@@ -6,7 +6,7 @@ class reportaccount_form extends moodleform {
 
 		$mform->addElement('date_selector', 'startdate', get_string('from'));
 		$date = (new DateTime())->setTimestamp(usergetmidnight(time()));
-		$date->modify('-2 month');
+		$date->modify('-6 month');
 		$mform->setDefault('startdate', $date->getTimestamp());
 
 		$mform->addElement('date_selector', 'enddate', get_string('to'));
