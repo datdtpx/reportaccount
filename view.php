@@ -137,27 +137,56 @@ if ($mform->get_data() != null) {
 	//echo $sotk . '-' . $sotk1 . '-' . $sotk2 . '-' . $countAccDayLeft . '</br>';
 	$table = new html_table();
 	$stt = 1;
-	$table->head = array(get_string('id', 'block_reportaccount'), get_string('fullname'), get_string('time'));
+	$table->head = array(get_string('id', 'block_reportaccount'), get_string('fullname'), get_string('time'), get_string('total', 'block_reportaccount'));
 
 	//do du lieu ra bang
-	foreach ($acc as $key => $value) {
+	if ($acc != null) {
+		foreach ($acc as $key => $value) {
+			$row = new html_table_row();
+			$cell = new html_table_cell($stt);
+			$row->cells[] = $cell;
+			$cell = new html_table_cell(html_writer::link($CFG->wwwroot . '/user/profile.php?id=' . $value->id, $value->lastname . ' ' . $value->firstname));
+			$row->cells[] = $cell;
+			if ($fromform->filter == 'day' && $stt == 1) {
+				$cell = new html_table_cell(day(layngay($to, '-1 day')));
+				$row->cells[] = $cell;
+				$cell = new html_table_cell($sotk);
+			} elseif ($fromform->filter == 'week' && $stt == 1) {
+				$cell = new html_table_cell(day(layngay($to, '-1 week')) . ' - ' . day($to));
+				$row->cells[] = $cell;
+				$cell = new html_table_cell($sotk);
+			} elseif ($fromform->filter == 'month' && $stt == 1) {
+				$cell = new html_table_cell(day(layngay($to, '-1 month')) . ' - ' . day($to));
+				$row->cells[] = $cell;
+				$cell = new html_table_cell($sotk);
+			} elseif ($stt != 1) {
+				$cell = new html_table_cell('');
+				$row->cells[] = $cell;
+				$cell = new html_table_cell('');
+			}
+			$row->cells[] = $cell;
+			$table->data[] = $row;
+			$stt++;
+		}
+	} else {
 		$row = new html_table_row();
 		$cell = new html_table_cell($stt);
 		$row->cells[] = $cell;
-		$cell = new html_table_cell(html_writer::link($CFG->wwwroot . '/user/profile.php?id=' . $value->id, $value->lastname . ' ' . $value->firstname));
+		$cell = new html_table_cell(get_string('na', 'block_reportaccount'));
 		$row->cells[] = $cell;
-		if ($fromform->filter == 'day' && $stt == 1) {
+		if ($fromform->filter == 'day') {
 			$cell = new html_table_cell(day(layngay($to, '-1 day')));
-		} elseif ($fromform->filter == 'week' && $stt == 1) {
+		} elseif ($fromform->filter == 'week') {
 			$cell = new html_table_cell(day(layngay($to, '-1 week')) . ' - ' . day($to));
-		} elseif ($fromform->filter == 'month' && $stt == 1) {
+		} elseif ($fromform->filter == 'month') {
 			$cell = new html_table_cell(day(layngay($to, '-1 month')) . ' - ' . day($to));
-		} elseif ($stt != 1) {
-			$cell = new html_table_cell('');
 		}
+		$row->cells[] = $cell;
+		$cell = new html_table_cell($sotk);
 		$row->cells[] = $cell;
 		$table->data[] = $row;
 		$stt++;
+		$sotk = 1;
 	}
 	if ($acc1 != null) {
 		foreach ($acc1 as $key => $value) {
@@ -168,17 +197,45 @@ if ($mform->get_data() != null) {
 			$row->cells[] = $cell;
 			if ($fromform->filter == 'day' && $stt == $sotk + 1) {
 				$cell = new html_table_cell(day(layngay($to, '-2 day')));
+				$row->cells[] = $cell;
+				$cell = new html_table_cell($sotk1);
 			} elseif ($fromform->filter == 'week' && $stt == $sotk + 1) {
-				$cell = new html_table_cell(day(layngay($to, '-2 week')) . ' - ' . day(layngay($to, '-1 week')));
+				$cell = new html_table_cell(day(layngay($to, '-2 week')) . ' - ' . day(layngay($to, '-1 week') - 86400));
+				$row->cells[] = $cell;
+				$cell = new html_table_cell($sotk1);
 			} elseif ($fromform->filter == 'month' && $stt == $sotk + 1) {
-				$cell = new html_table_cell(day(layngay($to, '-2 month')) . ' - ' . day(layngay($to, '-1 month')));
+				$cell = new html_table_cell(day(layngay($to, '-2 month')) . ' - ' . day(layngay($to, '-1 month') - 86400));
+				$row->cells[] = $cell;
+				$cell = new html_table_cell($sotk1);
 			} elseif ($stt != $sotk + 1) {
+				$cell = new html_table_cell('');
+				$row->cells[] = $cell;
 				$cell = new html_table_cell('');
 			}
 			$row->cells[] = $cell;
 			$table->data[] = $row;
 			$stt++;
 		}
+	} else {
+		$row = new html_table_row();
+		$cell = new html_table_cell($stt);
+		$row->cells[] = $cell;
+		$cell = new html_table_cell(get_string('na', 'block_reportaccount'));
+		$row->cells[] = $cell;
+		if ($fromform->filter == 'day' && $stt == $sotk + 1) {
+			$cell = new html_table_cell(day(layngay($to, '-2 day')));
+		} elseif ($fromform->filter == 'week' && $stt == $sotk + 1) {
+			$cell = new html_table_cell(day(layngay($to, '-2 week')) . ' - ' . day(layngay($to, '-1 week') - 86400));
+		} elseif ($fromform->filter == 'month' && $stt == $sotk + 1) {
+			$cell = new html_table_cell(day(layngay($to, '-2 month')) . ' - ' . day(layngay($to, '-1 month') - 86400));
+		}
+		$row->cells[] = $cell;
+		$cell = new html_table_cell($sotk1);
+		$row->cells[] = $cell;
+		$table->data[] = $row;
+		$stt++;
+		$sotk1 = 1;
+
 	}
 	if ($acc2 != null) {
 		foreach ($acc2 as $key => $value) {
@@ -189,17 +246,44 @@ if ($mform->get_data() != null) {
 			$row->cells[] = $cell;
 			if ($fromform->filter == 'day' && $stt == $sotk + $sotk1 + 1) {
 				$cell = new html_table_cell(day(layngay($to, '-3 day')));
+				$row->cells[] = $cell;
+				$cell = new html_table_cell($sotk2);
 			} elseif ($fromform->filter == 'week' && $stt == $sotk + $sotk1 + 1) {
-				$cell = new html_table_cell(day(layngay($to, '-3 week')) . ' - ' . day(layngay($to, '-2 week')));
+				$cell = new html_table_cell(day(layngay($to, '-3 week')) . ' - ' . day(layngay($to, '-2 week') - 86400));
+				$row->cells[] = $cell;
+				$cell = new html_table_cell($sotk2);
 			} elseif ($fromform->filter == 'month' && $stt == $sotk + $sotk1 + 1) {
-				$cell = new html_table_cell(day(layngay($to, '-3 month')) . ' - ' . day(layngay($to, '-2 month')));
+				$cell = new html_table_cell(day(layngay($to, '-3 month')) . ' - ' . day(layngay($to, '-2 month') - 86400));
+				$row->cells[] = $cell;
+				$cell = new html_table_cell($sotk2);
 			} elseif ($stt != $sotk + $sotk1 + 1) {
+				$cell = new html_table_cell('');
+				$row->cells[] = $cell;
 				$cell = new html_table_cell('');
 			}
 			$row->cells[] = $cell;
 			$table->data[] = $row;
 			$stt++;
 		}
+	} else {
+		$row = new html_table_row();
+		$cell = new html_table_cell($stt);
+		$row->cells[] = $cell;
+		$cell = new html_table_cell(get_string('na', 'block_reportaccount'));
+		$row->cells[] = $cell;
+		if ($fromform->filter == 'day' && $stt == $sotk + $sotk1 + 1) {
+			$cell = new html_table_cell(day(layngay($to, '-3 day')));
+		} elseif ($fromform->filter == 'week' && $stt == $sotk + $sotk1 + 1) {
+			$cell = new html_table_cell(day(layngay($to, '-3 week')) . ' - ' . day(layngay($to, '-2 week') - 86400));
+		} elseif ($fromform->filter == 'month' && $stt == $sotk + $sotk1 + 1) {
+			$cell = new html_table_cell(day(layngay($to, '-3 month')) . ' - ' . day(layngay($to, '-2 month') - 86400));
+		}
+		$row->cells[] = $cell;
+		$cell = new html_table_cell($sotk2);
+		$row->cells[] = $cell;
+		$table->data[] = $row;
+		$stt++;
+		$sotk2 = 1;
 	}
 	if ($accDayLeft != null) {
 		foreach ($accDayLeft as $key => $value) {
@@ -210,15 +294,32 @@ if ($mform->get_data() != null) {
 			$row->cells[] = $cell;
 			if ($stt == $sotk + $sotk1 + $sotk2 + 1) {
 				$cell = new html_table_cell(day($from) . ' - ' . day(layngay($last, '-1 day')));
+				$row->cells[] = $cell;
+				$cell = new html_table_cell($countAccDayLeft);
 			} else {
+				$cell = new html_table_cell('');
+				$row->cells[] = $cell;
 				$cell = new html_table_cell('');
 			}
 			$row->cells[] = $cell;
 			$table->data[] = $row;
 			$stt++;
 		}
+	} else {
+		$row = new html_table_row();
+		$cell = new html_table_cell($stt);
+		$row->cells[] = $cell;
+		$cell = new html_table_cell(get_string('na', 'block_reportaccount'));
+		$row->cells[] = $cell;
+		if ($stt == $sotk + $sotk1 + $sotk2 + 1) {
+			$cell = new html_table_cell(day($from) . ' - ' . day(layngay($last, '-1 day')));
+		}
+		$row->cells[] = $cell;
+		$cell = new html_table_cell($countAccDayLeft);
+		$row->cells[] = $cell;
+		$table->data[] = $row;
+		//$stt++;
 	}
-
 	echo html_writer::table($table);
 }
 

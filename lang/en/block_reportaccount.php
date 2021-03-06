@@ -4,3 +4,5 @@ $string['namereport'] = 'Report Account';
 $string['find'] = 'Find';
 $string['id'] = 'No.';
 $string['day'] = 'Day';
+$string['total'] = 'Total accounts';
+$string['na'] = 'N/A';
