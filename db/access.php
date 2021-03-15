@@ -1,17 +1,19 @@
 <?php
 $capabilities = array(
 
-	'block/reportaccount:myaddinstance' => array(
+	'block/th_accountreport:myaddinstance' => array(
 		'captype' => 'write',
 		'contextlevel' => CONTEXT_SYSTEM,
 		'archetypes' => array(
-			'user' => CAP_ALLOW,
+			'teacher' => CAP_ALLOW,
+			'editingteacher' => CAP_ALLOW,
+			'manager' => CAP_ALLOW,
 		),
 
 		'clonepermissionsfrom' => 'moodle/my:manageblocks',
 	),
 
-	'block/reportaccount:addinstance' => array(
+	'block/th_accountreport:addinstance' => array(
 		'riskbitmask' => RISK_SPAM | RISK_XSS,
 
 		'captype' => 'write',
@@ -22,5 +24,15 @@ $capabilities = array(
 		),
 
 		'clonepermissionsfrom' => 'moodle/site:manageblocks',
+	),
+	'block/th_accountreport:view' => array(
+		'riskbitmask' => RISK_SPAM | RISK_XSS,
+		'captype' => 'write',
+		'contextlevel' => CONTEXT_BLOCK,
+		'archetypes' => array(
+			'teacher' => CAP_ALLOW,
+			'editingteacher' => CAP_ALLOW,
+			'manager' => CAP_ALLOW,
+		),
 	),
 );

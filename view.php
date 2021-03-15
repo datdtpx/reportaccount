@@ -1,21 +1,25 @@
 <?php
 require_once "../../config.php";
 require_once "$CFG->libdir/formslib.php";
-require_once "lib.php";
+require_once "th_accountreport_form.php";
 global $DB, $CFG;
-
-require_login();
-
-$PAGE->set_url(new moodle_url('/blocks/reportaccount/view.php'));
+global $COURSE;
+if (!$course = $DB->get_record('course', array('id' => $COURSE->id))) {
+	print_error('invalidcourse', 'block_th_accountreport', $COURSE->id);
+}
+require_login($COURSE->id);
+require_capability('block/th_accountreport:view', context_course::instance($COURSE->id));
+//require_capability('block/th_gradereport:view', context_course::instance($COURSE->id));
+$PAGE->set_url(new moodle_url('/blocks/th_accountreport/view.php'));
 $context = context_system::instance();
 $PAGE->set_context($context);
-$PAGE->set_pagelayout('report');
-$PAGE->set_heading(get_string('namereport', 'block_reportaccount'));
-$PAGE->set_title(get_string('namereport', 'block_reportaccount'));
+$PAGE->set_pagelayout('standard');
+$PAGE->set_heading(get_string('namereport', 'block_th_accountreport'));
+$PAGE->set_title(get_string('namereport', 'block_th_accountreport'));
 
 echo $OUTPUT->header();
 
-$mform = new reportaccount_form();
+$mform = new th_accountreport_form();
 $fromform = $mform->get_data();
 
 $mform->display();
@@ -136,8 +140,13 @@ if ($mform->get_data() != null) {
 	//echo date('d/m/Y H:i:s', $from) . ' - ' . date('d/m/Y H:i:s', $last) . '</br>';
 	//echo $sotk . '-' . $sotk1 . '-' . $sotk2 . '-' . $countAccDayLeft . '</br>';
 	$table = new html_table();
+	$table->attributes = array('class' => 'reportaccount-table');
+	$lang = current_language();
+	echo '<link rel="stylesheet" type="text/css" href="<https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">';
+	$PAGE->requires->js_call_amd('local_thlib/main', 'init', array('.reportaccount-table', "reportaccount", $lang));
+
 	$stt = 1;
-	$table->head = array(get_string('id', 'block_reportaccount'), get_string('fullname'), get_string('time'), get_string('total', 'block_reportaccount'));
+	$table->head = array(get_string('id', 'block_th_accountreport'), get_string('fullname'), get_string('time'), get_string('total', 'block_th_accountreport'));
 
 	//do du lieu ra bang
 	if ($acc != null) {
@@ -172,7 +181,7 @@ if ($mform->get_data() != null) {
 		$row = new html_table_row();
 		$cell = new html_table_cell($stt);
 		$row->cells[] = $cell;
-		$cell = new html_table_cell(get_string('na', 'block_reportaccount'));
+		$cell = new html_table_cell(get_string('na', 'block_th_accountreport'));
 		$row->cells[] = $cell;
 		if ($fromform->filter == 'day') {
 			$cell = new html_table_cell(day(layngay($to, '-1 day')));
@@ -220,7 +229,7 @@ if ($mform->get_data() != null) {
 		$row = new html_table_row();
 		$cell = new html_table_cell($stt);
 		$row->cells[] = $cell;
-		$cell = new html_table_cell(get_string('na', 'block_reportaccount'));
+		$cell = new html_table_cell(get_string('na', 'block_th_accountreport'));
 		$row->cells[] = $cell;
 		if ($fromform->filter == 'day' && $stt == $sotk + 1) {
 			$cell = new html_table_cell(day(layngay($to, '-2 day')));
@@ -269,7 +278,7 @@ if ($mform->get_data() != null) {
 		$row = new html_table_row();
 		$cell = new html_table_cell($stt);
 		$row->cells[] = $cell;
-		$cell = new html_table_cell(get_string('na', 'block_reportaccount'));
+		$cell = new html_table_cell(get_string('na', 'block_th_accountreport'));
 		$row->cells[] = $cell;
 		if ($fromform->filter == 'day' && $stt == $sotk + $sotk1 + 1) {
 			$cell = new html_table_cell(day(layngay($to, '-3 day')));
@@ -309,7 +318,7 @@ if ($mform->get_data() != null) {
 		$row = new html_table_row();
 		$cell = new html_table_cell($stt);
 		$row->cells[] = $cell;
-		$cell = new html_table_cell(get_string('na', 'block_reportaccount'));
+		$cell = new html_table_cell(get_string('na', 'block_th_accountreport'));
 		$row->cells[] = $cell;
 		if ($stt == $sotk + $sotk1 + $sotk2 + 1) {
 			$cell = new html_table_cell(day($from) . ' - ' . day(layngay($last, '-1 day')));
@@ -318,7 +327,6 @@ if ($mform->get_data() != null) {
 		$cell = new html_table_cell($countAccDayLeft);
 		$row->cells[] = $cell;
 		$table->data[] = $row;
-		//$stt++;
 	}
 	echo html_writer::table($table);
 }
